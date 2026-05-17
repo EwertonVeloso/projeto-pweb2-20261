@@ -75,7 +75,31 @@ O usuário deve ter acesso a uma tela inicial com um resumo financeiro do mês a
 
 ---
 
-## RF04 - Definido pelo grupo (Etapa 1)
+## RF04 — Exportação de Transações (Definido pelo grupo)
+
+### Descrição
+
+O usuário deve conseguir exportar suas transações financeiras em formato CSV para utilização externa.
+
+### Detalhes Técnicos
+
+- Adicionar botão de exportação na tela de listagem de transações (`/transactions`)
+- Gerar arquivo CSV dinamicamente no frontend
+- Utilizar os dados armazenados no Redux
+- Permitir exportação por período
+- O arquivo exportado deve conter:
+  - Data
+  - Categoria
+  - Valor
+  - Tipo
+  - Descrição
+
+### Critérios de Aceitação
+
+- [ ] O usuário consegue exportar suas transações financeiras
+- [ ] Os dados exportados correspondem às transações exibidas na aplicação
+- [ ] O arquivo CSV contém todas as informações corretamente formatadas
+- [ ] O download do arquivo é iniciado imediatamente após a solicitação do usuário
 
 ## RF05 — Cadastro de Metas Financeiras (Etapa 2)
 
