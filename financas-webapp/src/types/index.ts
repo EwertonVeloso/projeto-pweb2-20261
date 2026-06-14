@@ -6,12 +6,20 @@ export interface User {
 
 export interface AuthResponse {
   token: string;
-  user: User;
+  id: number;
+  username: string;
+  name: string;
 }
 
 export interface LoginCredentials {
-  email: string;
+  username: string;
   password: string;
+}
+
+export interface RegisterCredentials {
+  username: string;
+  password: string;
+  name: string;
 }
 
 export interface Transaction {

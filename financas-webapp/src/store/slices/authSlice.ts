@@ -1,15 +1,27 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { api } from '../../services/api.ts';
-import type { AuthResponse, LoginCredentials } from '../../types';
+import type { AuthResponse, LoginCredentials, RegisterCredentials } from '../../types';
 
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async (credentials: LoginCredentials, thunkAPI) => {
     try {
-      const response = await api.post<AuthResponse>('/auth', credentials); 
+      const response = await api.post<AuthResponse>('/auth/login', credentials);
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue('Authentication failed');
+      return thunkAPI.rejectWithValue('Falha na autenticação. Verifique suas credenciais.');
+    }
+  }
+);
+
+export const registerUser = createAsyncThunk(
+  'auth/registerUser',
+  async (credentials: RegisterCredentials, thunkAPI) => {
+    try {
+      const response = await api.post<AuthResponse>('/auth/register', credentials);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue('Falha no cadastro. Tente novamente.');
     }
   }
 );
@@ -19,7 +31,7 @@ const authSlice = createSlice({
   initialState: {
     token: localStorage.getItem('token') || null,
     userName: null as string | null,
-    status: 'idle',
+    status: 'idle' as 'idle' | 'loading' | 'succeeded' | 'failed',
     error: null as string | null,
   },
   reducers: {
@@ -28,22 +40,45 @@ const authSlice = createSlice({
       state.userName = null;
       localStorage.removeItem('token');
     },
+    clearAuthError: (state) => {
+      state.error = null;
+      state.status = 'idle';
+    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(loginUser.pending, (state) => { state.status = 'loading'; })
+      // Login
+      .addCase(loginUser.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.token = action.payload.token;
-        state.userName = action.payload.user.name;
+        state.userName = action.payload.name;
         localStorage.setItem('token', action.payload.token);
       })
       .addCase(loginUser.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string;
+      })
+      // Register
+      .addCase(registerUser.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.token = action.payload.token;
+        state.userName = action.payload.name;
+        localStorage.setItem('token', action.payload.token);
+      })
+      .addCase(registerUser.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload as string;
       });
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, clearAuthError } = authSlice.actions;
 export default authSlice.reducer;

@@ -2,10 +2,11 @@ import { Provider } from 'react-redux';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
 import PrivateRoute from './components/layout/PrivateRoute';
+import Login from './pages/Login';
+import Register from './pages/Register';
 import Transactions from './pages/Transactions';
 import { store } from './store';
 
-const Login = () => <h2>Página de Login (Substituir pelo componente real)</h2>;
 const Dashboard = () => <h2>Dashboard (Substituir pelo componente real)</h2>;
 
 export default function App() {
@@ -14,6 +15,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
           <Route element={<PrivateRoute />}>
             <Route element={<MainLayout />}>
