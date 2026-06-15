@@ -8,8 +8,13 @@ export const loginUser = createAsyncThunk(
     try {
       const response = await api.post<AuthResponse>('/auth/login', credentials);
       return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue('Falha na autenticação. Verifique suas credenciais.');
+    } catch (error: any) {
+      console.error('Erro no login:', error.response?.status, error.response?.data || error.message);
+      const message =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Falha na autenticação. Verifique suas credenciais.';
+      return thunkAPI.rejectWithValue(message);
     }
   }
 );
@@ -20,8 +25,13 @@ export const registerUser = createAsyncThunk(
     try {
       const response = await api.post<AuthResponse>('/auth/register', credentials);
       return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue('Falha no cadastro. Tente novamente.');
+    } catch (error: any) {
+      console.error('Erro no cadastro:', error.response?.status, error.response?.data || error.message);
+      const message =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Falha no cadastro. Tente novamente.';
+      return thunkAPI.rejectWithValue(message);
     }
   }
 );

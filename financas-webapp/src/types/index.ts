@@ -24,11 +24,28 @@ export interface RegisterCredentials {
 
 export interface Transaction {
   id: number;
-  description: string;
   amount: number;
   type: 'INCOME' | 'EXPENSE';
+  categoryId: number;
+  categoryName: string;
   date: string;
-  category?: string;
+  description: string;
+  tag: string | null;
 }
 
-export type NewTransaction = Omit<Transaction, 'id' | 'category'>;
+export interface NewTransaction {
+  amount: number;
+  type: 'INCOME' | 'EXPENSE';
+  categoryId: number;
+  date: string;
+  description?: string;
+  tag?: string;
+}
+
+export interface PageResponse<T> {
+  content: T[];
+  totalPages: number;
+  totalElements: number;
+  size: number;
+  number: number;
+}

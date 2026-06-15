@@ -1,15 +1,16 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { api } from '../../services/api';
-import type { NewTransaction, Transaction } from '../../types';
+import type { NewTransaction, PageResponse, Transaction } from '../../types';
 
 export const fetchTransactions = createAsyncThunk(
   'transactions/fetchTransactions',
   async (_, thunkAPI) => {
     try {
-      const response = await api.get<Transaction[]>('/transactions');
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue('Failed to fetch transactions');
+      const response = await api.get<PageResponse<Transaction>>('/transactions');
+      return response.data.content;
+    } catch (error: any) {
+      console.error('Erro ao buscar transações:', error.response?.status, error.response?.data || error.message);
+      return thunkAPI.rejectWithValue('Falha ao carregar transações');
     }
   }
 );
@@ -20,8 +21,9 @@ export const createTransaction = createAsyncThunk(
     try {
       const response = await api.post<Transaction>('/transactions', transaction);
       return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue('Failed to create transaction');
+    } catch (error: any) {
+      console.error('Erro ao criar transação:', error.response?.status, error.response?.data || error.message);
+      return thunkAPI.rejectWithValue('Falha ao criar transação');
     }
   }
 );

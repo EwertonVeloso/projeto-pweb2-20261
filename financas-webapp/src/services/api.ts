@@ -1,15 +1,19 @@
 import axios from 'axios';
 
 export const api = axios.create({
-  baseURL: 'http://localhost:8080/api', 
+  baseURL: '/api', 
 });
 
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const url = config.url || '';
+  const isAuthRoute = url.includes('/auth/login') || url.includes('/auth/register');
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (!isAuthRoute) {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 }, (error) => {
@@ -19,7 +23,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use((response) => {
   return response;
 }, (error) => {
-  if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+  const url = error.config?.url || '';
+  const isAuthRoute = url.includes('/auth/login') || url.includes('/auth/register');
+
+  if (!isAuthRoute && error.response && (error.response.status === 401 || error.response.status === 403)) {
     localStorage.removeItem('token');
     window.location.href = '/login';
   }
