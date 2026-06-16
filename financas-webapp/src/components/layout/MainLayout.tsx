@@ -17,7 +17,7 @@ export default function MainLayout() {
       <aside style={{ width: '250px', backgroundColor: '#343a40', color: '#fff', padding: '20px', display: 'flex', flexDirection: 'column' }}>
         <h2>Finanças App</h2>
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '30px' }}>
-          <Link to="/dashboard" style={{ color: '#fff', textDecoration: 'none' }}>Dashboard</Link>
+          <Link to="/" style={{ color: '#fff', textDecoration: 'none' }}>Dashboard</Link>
           <Link to="/transactions" style={{ color: '#fff', textDecoration: 'none' }}>Transações</Link>
         </nav>
         <div style={{ marginTop: 'auto' }}>
