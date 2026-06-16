@@ -18,12 +18,12 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       {/* Branding side — purple gradient, hidden on mobile */}
       <div className="relative hidden flex-col items-center overflow-hidden bg-gradient-to-br from-[#7c3aed] via-[#8b5cf6] to-[#a78bfa] md:flex">
         {/* Title text */}
-        <div className="relative z-10 w-full px-12 pt-16 text-left text-white">
+        <div className="animate-surgir relative z-10 w-full px-12 pt-16 text-left text-white">
           <h2
             className="font-bold leading-tight text-white"
-            style={{ fontSize: 'clamp(4rem, 3vw, 3rem)', margin: 0 }}
+            style={{ fontSize: 'clamp(6rem, 3vw, 3rem)', margin: 0 }}
           >
-            Bem vindo ao finanças
+            Bem vindo ao<br />finanças
           </h2>
           <p className="mt-3 text-sm text-white/70">
             Faça login para acessar a sua conta
@@ -31,11 +31,11 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         </div>
 
         {/* Illustration — fills the remaining space and sits at bottom */}
-        <div className="relative z-10 flex flex-1 items-end justify-center px-4 mt-4 min-h-0">
+        <div className="animate-surgir-delay relative z-10 flex flex-1 items-end justify-center px-4 mt-4 min-h-0">
           <img
             src={desenhoImg}
             alt="Ilustração de finanças"
-            className="w-full max-w-[480px] max-h-full object-contain"
+            className="w-full max-w-[600px] max-h-full object-contain"
           />
         </div>
       </div>

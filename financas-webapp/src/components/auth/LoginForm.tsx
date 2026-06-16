@@ -30,7 +30,7 @@ export default function LoginForm() {
         >
           Login
         </h1>
-        <p className="mt-2 text-sm text-gray-400">
+        <p className="mt-2 pt-3 text-sm text-gray-400">
           Insira suas credenciais
         </p>
       </div>
@@ -68,7 +68,7 @@ export default function LoginForm() {
           <input
             id="username"
             type="text"
-            placeholder="seu_usuario"
+            placeholder="Seu nome de usuário ou email"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
@@ -139,8 +139,8 @@ export default function LoginForm() {
       </form>
 
       {/* Register link */}
-      <p className="mt-8 text-sm text-gray-500">
-        Ainda não tem uma conta?{' '}
+      <p className="mt-8 pt-4 text-sm text-gray-500">
+        Ainda não possui uma conta?{' '}
         <Link
           to="/register"
           className="font-semibold text-white underline underline-offset-2 transition-colors hover:text-purple-400"

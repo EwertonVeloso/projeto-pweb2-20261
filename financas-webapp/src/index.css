@@ -121,3 +121,23 @@ input:-webkit-autofill:active {
   -webkit-text-fill-color: #ffffff !important;
   transition: background-color 5000s ease-in-out 0s;
 }
+
+/* Animação "surgir" — fade-in + slide-up */
+@keyframes surgir {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-surgir {
+  animation: surgir 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-surgir-delay {
+  animation: surgir 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
+}
