@@ -5,6 +5,7 @@ import PrivateRoute from './components/layout/PrivateRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Transactions from './pages/Transactions';
+import NewTransaction from './pages/NewTransaction';
 import { store } from './store';
 
 const Dashboard = () => <h2>Dashboard (Substituir pelo componente real)</h2>;
@@ -21,6 +22,7 @@ export default function App() {
             <Route element={<MainLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/transactions" element={<Transactions />} />
+              <Route path="/transactions/new" element={<NewTransaction />} />
             </Route>
           </Route>
           

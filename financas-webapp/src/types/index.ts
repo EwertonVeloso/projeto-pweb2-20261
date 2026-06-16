@@ -4,6 +4,11 @@ export interface User {
   email: string;
 }
 
+export interface Category {
+  id: number;
+  name: string;
+}
+
 export interface AuthResponse {
   token: string;
   id: number;
