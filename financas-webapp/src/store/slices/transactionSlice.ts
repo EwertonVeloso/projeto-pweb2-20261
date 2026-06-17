@@ -160,4 +160,51 @@ const transactionSlice = createSlice({
 });
 
 export const { clearTransactionError } = transactionSlice.actions;
+
+// Seletores derivados usados pelo Dashboard (RF03)
+// Usamos { transactions: TransactionState } para evitar importação circular com store/index.ts
+
+export const selectCurrentMonthTotals = (state: { transactions: TransactionState }) => {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1; // getMonth() retorna 0-11
+
+  let income = 0;
+  let expense = 0;
+
+  state.transactions.items.forEach((t) => {
+    if (!t.date) return;
+    const parts = t.date.split('-'); // formato esperado: "YYYY-MM-DD"
+    if (parts.length >= 2) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10);
+      if (year === currentYear && month === currentMonth) {
+        if (t.type === 'INCOME') {
+          income += Number(t.amount);
+        } else if (t.type === 'EXPENSE') {
+          expense += Number(t.amount);
+        }
+      }
+    }
+  });
+
+  return {
+    income,
+    expense,
+    balance: income - expense,
+  };
+};
+
+export const selectRecentTransactions = (state: { transactions: TransactionState }) => {
+  return [...state.transactions.items]
+    .sort((a, b) => {
+      // Ordena do mais recente para o mais antigo
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      if (dateB !== dateA) return dateB - dateA;
+      return b.id - a.id; // desempate por id
+    })
+    .slice(0, 5); // retorna apenas as 5 mais recentes
+};
+
 export default transactionSlice.reducer;

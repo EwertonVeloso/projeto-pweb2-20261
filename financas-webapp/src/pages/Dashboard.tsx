@@ -16,7 +16,18 @@ export default function Dashboard() {
   const recentTransactions = useSelector(selectRecentTransactions);
 
   useEffect(() => {
-    dispatch(fetchTransactions());
+    // Busca todas as transações do mês corrente para os cálculos do dashboard.
+    // Sem filtro de data, a API retorna apenas a primeira página (ex: 10 registros),
+    // o que tornaria os totais de receita/despesa/saldo incorretos para meses com muitas transações.
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const lastDay = new Date(year, now.getMonth() + 1, 0).getDate();
+    dispatch(fetchTransactions({
+      startDate: `${year}-${month}-01`,
+      endDate: `${year}-${month}-${lastDay}`,
+      size: 200, // limite alto para cobrir todos os registros do mês
+    }));
   }, [dispatch]);
 
   const getCurrentMonthName = () => {
