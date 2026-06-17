@@ -9,7 +9,7 @@ export default function Login() {
 
   // Se já autenticado, redireciona para o dashboard
   if (token) {
-    return <Navigate to="/transactions" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return (

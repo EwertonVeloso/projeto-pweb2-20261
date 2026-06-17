@@ -1,6 +1,12 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import axios from 'axios';
 import { api } from '../../services/api.ts';
 import type { AuthResponse, LoginCredentials, RegisterCredentials } from '../../types';
+
+interface ErrorResponseData {
+  message?: string;
+  error?: string;
+}
 
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
@@ -8,12 +14,16 @@ export const loginUser = createAsyncThunk(
     try {
       const response = await api.post<AuthResponse>('/auth/login', credentials);
       return response.data;
-    } catch (error: any) {
-      console.error('Erro no login:', error.response?.status, error.response?.data || error.message);
-      const message =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        'Falha na autenticação. Verifique suas credenciais.';
+    } catch (error) {
+      let message = 'Falha na autenticação. Verifique suas credenciais.';
+      if (axios.isAxiosError(error)) {
+        console.error('Erro no login:', error.response?.status, error.response?.data || error.message);
+        const data = error.response?.data as ErrorResponseData | undefined;
+        message = data?.message || data?.error || message;
+      } else if (error instanceof Error) {
+        console.error('Erro no login:', error.message);
+        message = error.message;
+      }
       return thunkAPI.rejectWithValue(message);
     }
   }
@@ -25,12 +35,16 @@ export const registerUser = createAsyncThunk(
     try {
       const response = await api.post<AuthResponse>('/auth/register', credentials);
       return response.data;
-    } catch (error: any) {
-      console.error('Erro no cadastro:', error.response?.status, error.response?.data || error.message);
-      const message =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        'Falha no cadastro. Tente novamente.';
+    } catch (error) {
+      let message = 'Falha no cadastro. Tente novamente.';
+      if (axios.isAxiosError(error)) {
+        console.error('Erro no cadastro:', error.response?.status, error.response?.data || error.message);
+        const data = error.response?.data as ErrorResponseData | undefined;
+        message = data?.message || data?.error || message;
+      } else if (error instanceof Error) {
+        console.error('Erro no cadastro:', error.message);
+        message = error.message;
+      }
       return thunkAPI.rejectWithValue(message);
     }
   }

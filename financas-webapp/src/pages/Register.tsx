@@ -9,7 +9,7 @@ export default function Register() {
 
   // Se já autenticado, redireciona para o dashboard
   if (token) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return (

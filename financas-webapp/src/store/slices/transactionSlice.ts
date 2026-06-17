@@ -24,7 +24,7 @@ export const fetchTransactions = createAsyncThunk(
         if (params.startDate) queryParams.startDate = params.startDate;
         if (params.endDate) queryParams.endDate = params.endDate;
       }
-      
+
       const response = await api.get<PageResponse<Transaction>>('/transactions', {
         params: queryParams,
       });
@@ -71,7 +71,7 @@ interface TransactionState {
   items: Transaction[];
   status: Status;
   error: string | null;
-  
+
   // Paginação
   currentPage: number;
   totalPages: number;
