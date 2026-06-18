@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Toast from '../common/Toast';
 import TransactionTable from './TransactionTable';
-import TransactionFilters from './TransactionFilters';
+import TransactionFilters from './TransactionFilters.tsx';
 import TransactionExportSection from './TransactionExportSection';
 import TransactionPagination from './TransactionPagination';
 import type { AppDispatch, RootState } from '../../store';

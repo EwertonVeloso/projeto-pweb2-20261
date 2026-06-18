@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Wallet, TrendingUp, TrendingDown } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import type { AppDispatch, RootState } from '../../store';
@@ -105,31 +106,19 @@ export default function DashboardContent() {
               value={formatCurrency(balance)}
               accentColor="purple"
               isNegative={balance < 0}
-              icon={
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12m18 0V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44l-2.118-2.118a1.5 1.5 0 0 0-1.06-.44H5.25A2.25 2.25 0 0 0 3 6v6" />
-                </svg>
-              }
+              icon={<Wallet className="h-6 w-6" />}
             />
             <MetricCard
               label="Receitas do Mês"
               value={formatCurrency(income)}
               accentColor="emerald"
-              icon={
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.519l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
-                </svg>
-              }
+              icon={<TrendingUp className="h-6 w-6" />}
             />
             <MetricCard
               label="Despesas do Mês"
               value={formatCurrency(expense)}
               accentColor="rose"
-              icon={
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6 9 12.75l4.306-4.307a11.95 11.95 0 0 1 5.814 5.519l2.74 1.22m0 0-5.94 2.28m5.94-2.28-2.28 5.941" />
-                </svg>
-              }
+              icon={<TrendingDown className="h-6 w-6" />}
             />
           </>
         )}
