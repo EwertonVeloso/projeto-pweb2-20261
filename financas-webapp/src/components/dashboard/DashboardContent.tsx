@@ -4,8 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import type { AppDispatch, RootState } from '../../store';
 import {
-  fetchTransactions,
-  selectCurrentMonthTotals,
+  fetchDashboardTransactions,
+  selectDashboardTotals,
   selectRecentTransactions,
 } from '../../store/slices/transactionSlice';
 import MetricCard from './MetricCard';
@@ -15,21 +15,13 @@ import FinancialDonutChart from './FinancialDonutChart';
 
 export default function DashboardContent() {
   const dispatch = useDispatch<AppDispatch>();
-  const { status, error } = useSelector((state: RootState) => state.transactions);
+  const { dashboardStatus, dashboardError } = useSelector((state: RootState) => state.transactions);
 
-  const { income, expense, balance } = useSelector(selectCurrentMonthTotals);
+  const { income, expense, balance } = useSelector(selectDashboardTotals);
   const recentTransactions = useSelector(selectRecentTransactions);
 
   useEffect(() => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const lastDay = new Date(year, now.getMonth() + 1, 0).getDate();
-    dispatch(fetchTransactions({
-      startDate: `${year}-${month}-01`,
-      endDate: `${year}-${month}-${lastDay}`,
-      size: 200,
-    }));
+    dispatch(fetchDashboardTransactions());
   }, [dispatch]);
 
   const getCurrentMonthName = () => {
@@ -56,7 +48,7 @@ export default function DashboardContent() {
     return `${day}/${month}/${year}`;
   };
 
-  const isLoading = status === 'loading';
+  const isLoading = dashboardStatus === 'loading';
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto px-4 py-6 animate-surgir">
@@ -82,12 +74,12 @@ export default function DashboardContent() {
       </div>
 
       {/* Error Alert */}
-      {status === 'failed' && error && (
+      {dashboardStatus === 'failed' && dashboardError && (
         <div className="flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3.5 text-sm text-red-600 dark:text-red-400">
           <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
           </svg>
-          <span>{error}</span>
+          <span>{dashboardError}</span>
         </div>
       )}
 

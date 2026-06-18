@@ -7,7 +7,7 @@ import TransactionFilters from './TransactionFilters.tsx';
 import TransactionExportSection from './TransactionExportSection';
 import TransactionPagination from './TransactionPagination';
 import type { AppDispatch, RootState } from '../../store';
-import { fetchTransactions, fetchCategories } from '../../store/slices/transactionSlice';
+import { fetchTransactions, fetchCategories, fetchExportTransactions } from '../../store/slices/transactionSlice';
 import { exportTransactionsCsv } from '../../utils/exportTransactionsCsv';
 
 export default function TransactionListContent() {
@@ -15,7 +15,7 @@ export default function TransactionListContent() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { items, status, error, currentPage, totalPages, categories } = useSelector(
+  const { items, status, error, currentPage, totalPages, categories, exportStatus } = useSelector(
     (state: RootState) => state.transactions
   );
 
@@ -60,11 +60,19 @@ export default function TransactionListContent() {
     setFilterCategory('');
   };
 
-  const handleExportCsv = () => {
-    exportTransactionsCsv(items, {
+  const handleExportCsv = async () => {
+    // Busca todas as transações do período antes de exportar
+    const result = await dispatch(fetchExportTransactions({
       startDate: exportStartDate || undefined,
       endDate: exportEndDate || undefined,
-    });
+    }));
+
+    if (fetchExportTransactions.fulfilled.match(result)) {
+      exportTransactionsCsv(result.payload, {
+        startDate: exportStartDate || undefined,
+        endDate: exportEndDate || undefined,
+      });
+    }
   };
 
   return (
@@ -85,7 +93,7 @@ export default function TransactionListContent() {
           <button
             id="btn-exportar-csv"
             onClick={handleExportCsv}
-            disabled={items.length === 0}
+            disabled={items.length === 0 || exportStatus === 'loading'}
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-lg shadow-sm transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <svg
@@ -101,7 +109,7 @@ export default function TransactionListContent() {
                 clipRule="evenodd"
               />
             </svg>
-            Exportar CSV
+            {exportStatus === 'loading' ? 'Exportando...' : 'Exportar CSV'}
           </button>
 
           {/* Botão nova transação */}

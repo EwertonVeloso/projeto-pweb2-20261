@@ -2,6 +2,8 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { api } from '../../services/api.ts';
 import type { NewTransaction, Transaction, Category, PageResponse } from '../../types';
 
+// ─── Parâmetros ────────────────────────────────────────────────────────────────
+
 export interface FetchTransactionsParams {
   page?: number;
   size?: number;
@@ -11,6 +13,12 @@ export interface FetchTransactionsParams {
   endDate?: string;
 }
 
+export interface FetchExportParams {
+  startDate?: string;
+  endDate?: string;
+}
+
+/** Busca paginada para a listagem de transações */
 export const fetchTransactions = createAsyncThunk(
   'transactions/fetchTransactions',
   async (params: FetchTransactionsParams | undefined, thunkAPI) => {
@@ -32,6 +40,55 @@ export const fetchTransactions = createAsyncThunk(
     } catch (error: any) {
       console.error('Erro ao buscar transações:', error.response?.status, error.response?.data || error.message);
       const message = error.response?.data?.message || 'Falha ao carregar transações';
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+/** Busca todas as transações do mês para o Dashboard */
+export const fetchDashboardTransactions = createAsyncThunk(
+  'transactions/fetchDashboardTransactions',
+  async (_, thunkAPI) => {
+    try {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const lastDay = new Date(year, now.getMonth() + 1, 0).getDate();
+
+      const response = await api.get<PageResponse<Transaction>>('/transactions', {
+        params: {
+          startDate: `${year}-${month}-01`,
+          endDate: `${year}-${month}-${lastDay}`,
+          size: 1000,
+        },
+      });
+      return response.data.content;
+    } catch (error: any) {
+      console.error('Erro ao buscar transações do dashboard:', error.response?.status, error.response?.data || error.message);
+      const message = error.response?.data?.message || 'Falha ao carregar dados do dashboard';
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+/** Busca todas as transações para exportação CSV */
+export const fetchExportTransactions = createAsyncThunk(
+  'transactions/fetchExportTransactions',
+  async (params: FetchExportParams | undefined, thunkAPI) => {
+    try {
+      const queryParams: Record<string, any> = {
+        size: 10000,
+      };
+      if (params?.startDate) queryParams.startDate = params.startDate;
+      if (params?.endDate) queryParams.endDate = params.endDate;
+
+      const response = await api.get<PageResponse<Transaction>>('/transactions', {
+        params: queryParams,
+      });
+      return response.data.content;
+    } catch (error: any) {
+      console.error('Erro ao buscar transações para exportação:', error.response?.status, error.response?.data || error.message);
+      const message = error.response?.data?.message || 'Falha ao carregar transações para exportação';
       return thunkAPI.rejectWithValue(message);
     }
   }
@@ -71,14 +128,19 @@ interface TransactionState {
   items: Transaction[];
   status: Status;
   error: string | null;
-
-  // Paginação
   currentPage: number;
   totalPages: number;
   totalElements: number;
   pageSize: number;
 
-  // Categorias
+  dashboardItems: Transaction[];
+  dashboardStatus: Status;
+  dashboardError: string | null;
+
+  exportItems: Transaction[];
+  exportStatus: Status;
+  exportError: string | null;
+
   categories: Category[];
   categoriesStatus: Status;
   categoriesError: string | null;
@@ -92,6 +154,15 @@ const initialState: TransactionState = {
   totalPages: 0,
   totalElements: 0,
   pageSize: 10,
+
+  dashboardItems: [],
+  dashboardStatus: 'idle',
+  dashboardError: null,
+
+  exportItems: [],
+  exportStatus: 'idle',
+  exportError: null,
+
   categories: [],
   categoriesStatus: 'idle',
   categoriesError: null,
@@ -104,10 +175,15 @@ const transactionSlice = createSlice({
     clearTransactionError(state) {
       state.error = null;
     },
+    clearExportData(state) {
+      state.exportItems = [];
+      state.exportStatus = 'idle';
+      state.exportError = null;
+    },
   },
   extraReducers: (builder) => {
     builder
-      // fetchTransactions
+      // fetchTransactions 
       .addCase(fetchTransactions.pending, (state) => {
         state.status = 'loading';
         state.error = null;
@@ -123,6 +199,34 @@ const transactionSlice = createSlice({
       .addCase(fetchTransactions.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload as string;
+      })
+
+      // fetchDashboardTransactions 
+      .addCase(fetchDashboardTransactions.pending, (state) => {
+        state.dashboardStatus = 'loading';
+        state.dashboardError = null;
+      })
+      .addCase(fetchDashboardTransactions.fulfilled, (state, action) => {
+        state.dashboardStatus = 'succeeded';
+        state.dashboardItems = action.payload;
+      })
+      .addCase(fetchDashboardTransactions.rejected, (state, action) => {
+        state.dashboardStatus = 'failed';
+        state.dashboardError = action.payload as string;
+      })
+
+      // fetchExportTransactions
+      .addCase(fetchExportTransactions.pending, (state) => {
+        state.exportStatus = 'loading';
+        state.exportError = null;
+      })
+      .addCase(fetchExportTransactions.fulfilled, (state, action) => {
+        state.exportStatus = 'succeeded';
+        state.exportItems = action.payload;
+      })
+      .addCase(fetchExportTransactions.rejected, (state, action) => {
+        state.exportStatus = 'failed';
+        state.exportError = action.payload as string;
       })
 
       // createTransaction
@@ -159,32 +263,19 @@ const transactionSlice = createSlice({
   },
 });
 
-export const { clearTransactionError } = transactionSlice.actions;
+export const { clearTransactionError, clearExportData } = transactionSlice.actions;
 
-// Seletores derivados usados pelo Dashboard (RF03)
-// Usamos { transactions: TransactionState } para evitar importação circular com store/index.ts
 
-export const selectCurrentMonthTotals = (state: { transactions: TransactionState }) => {
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth() + 1; // getMonth() retorna 0-11
-
+// Seletores do Dashboard 
+export const selectDashboardTotals = (state: { transactions: TransactionState }) => {
   let income = 0;
   let expense = 0;
 
-  state.transactions.items.forEach((t) => {
-    if (!t.date) return;
-    const parts = t.date.split('-'); // formato esperado: "YYYY-MM-DD"
-    if (parts.length >= 2) {
-      const year = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10);
-      if (year === currentYear && month === currentMonth) {
-        if (t.type === 'INCOME') {
-          income += Number(t.amount);
-        } else if (t.type === 'EXPENSE') {
-          expense += Number(t.amount);
-        }
-      }
+  state.transactions.dashboardItems.forEach((t) => {
+    if (t.type === 'INCOME') {
+      income += Number(t.amount);
+    } else if (t.type === 'EXPENSE') {
+      expense += Number(t.amount);
     }
   });
 
@@ -196,15 +287,14 @@ export const selectCurrentMonthTotals = (state: { transactions: TransactionState
 };
 
 export const selectRecentTransactions = (state: { transactions: TransactionState }) => {
-  return [...state.transactions.items]
+  return [...state.transactions.dashboardItems]
     .sort((a, b) => {
-      // Ordena do mais recente para o mais antigo
       const dateA = new Date(a.date).getTime();
       const dateB = new Date(b.date).getTime();
       if (dateB !== dateA) return dateB - dateA;
-      return b.id - a.id; // desempate por id
+      return b.id - a.id;
     })
-    .slice(0, 5); // retorna apenas as 5 mais recentes
+    .slice(0, 5);
 };
 
 export default transactionSlice.reducer;
