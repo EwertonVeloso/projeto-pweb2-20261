@@ -1,0 +1,157 @@
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import type { AppDispatch, RootState } from '../../store';
+import {
+  fetchTransactions,
+  selectCurrentMonthTotals,
+  selectRecentTransactions,
+} from '../../store/slices/transactionSlice';
+import MetricCard from './MetricCard';
+import MetricCardSkeleton from './MetricCardSkeleton';
+import RecentTransactionsList from './RecentTransactionsList';
+import FinancialDonutChart from './FinancialDonutChart';
+
+export default function DashboardContent() {
+  const dispatch = useDispatch<AppDispatch>();
+  const { status, error } = useSelector((state: RootState) => state.transactions);
+
+  const { income, expense, balance } = useSelector(selectCurrentMonthTotals);
+  const recentTransactions = useSelector(selectRecentTransactions);
+
+  useEffect(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const lastDay = new Date(year, now.getMonth() + 1, 0).getDate();
+    dispatch(fetchTransactions({
+      startDate: `${year}-${month}-01`,
+      endDate: `${year}-${month}-${lastDay}`,
+      size: 200,
+    }));
+  }, [dispatch]);
+
+  const getCurrentMonthName = () => {
+    const months = [
+      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+    const now = new Date();
+    return `${months[now.getMonth()]} de ${now.getFullYear()}`;
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value);
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    const parts = dateString.split('-');
+    if (parts.length < 3) return dateString;
+    const [year, month, day] = parts;
+    return `${day}/${month}/${year}`;
+  };
+
+  const isLoading = status === 'loading';
+
+  return (
+    <div className="space-y-8 max-w-7xl mx-auto px-4 py-6 animate-surgir">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight m-0">
+            Dashboard Financeiro
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Resumo de <span className="font-semibold text-purple-600 dark:text-purple-400">{getCurrentMonthName()}</span>
+          </p>
+        </div>
+        <Link
+          to="/transactions"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold px-4 py-2.5 shadow-sm transition-all duration-200 hover:shadow-purple-500/10 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+        >
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          Nova Transação
+        </Link>
+      </div>
+
+      {/* Error Alert */}
+      {status === 'failed' && error && (
+        <div className="flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3.5 text-sm text-red-600 dark:text-red-400">
+          <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+          </svg>
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* Cards de Métricas */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {isLoading ? (
+          <>
+            <MetricCardSkeleton />
+            <MetricCardSkeleton />
+            <MetricCardSkeleton />
+          </>
+        ) : (
+          <>
+            <MetricCard
+              label="Saldo Atual (Mês Corrente)"
+              value={formatCurrency(balance)}
+              accentColor="purple"
+              isNegative={balance < 0}
+              icon={
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12m18 0V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44l-2.118-2.118a1.5 1.5 0 0 0-1.06-.44H5.25A2.25 2.25 0 0 0 3 6v6" />
+                </svg>
+              }
+            />
+            <MetricCard
+              label="Receitas do Mês"
+              value={formatCurrency(income)}
+              accentColor="emerald"
+              icon={
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.519l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
+                </svg>
+              }
+            />
+            <MetricCard
+              label="Despesas do Mês"
+              value={formatCurrency(expense)}
+              accentColor="rose"
+              icon={
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6 9 12.75l4.306-4.307a11.95 11.95 0 0 1 5.814 5.519l2.74 1.22m0 0-5.94 2.28m5.94-2.28-2.28 5.941" />
+                </svg>
+              }
+            />
+          </>
+        )}
+      </div>
+
+      {/* Grid de Transações Recentes & Gráfico */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+        <RecentTransactionsList
+          transactions={recentTransactions}
+          isLoading={isLoading}
+          formatCurrency={formatCurrency}
+          formatDate={formatDate}
+        />
+
+        <div className="lg:col-span-1">
+          <FinancialDonutChart
+            income={income}
+            expense={expense}
+            formatCurrency={formatCurrency}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
