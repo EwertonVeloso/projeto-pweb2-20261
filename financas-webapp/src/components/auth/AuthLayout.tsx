@@ -21,7 +21,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         <div className="animate-surgir relative z-10 w-full px-12 pt-16 text-left text-white">
           <h2
             className="font-bold leading-tight text-white"
-            style={{ fontSize: 'clamp(6rem, 3vw, 3rem)', margin: 0 }}
+            style={{ fontSize: 'clamp(4rem, 3vw, 3rem)', margin: 0 }}
           >
             Bem vindo ao<br />finanças
           </h2>
