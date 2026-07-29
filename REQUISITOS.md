@@ -103,6 +103,95 @@ O usuário deve conseguir exportar suas transações financeiras em formato CSV 
 
 ## RF05 — Cadastro de Metas Financeiras (Etapa 2)
 
-## RF06 - Limites de Gastos (Etapa 2)
+### Descrição
 
-## RF07 - Definido pelo grupo (Etapa 2)
+O usuário deve conseguir registrar metas financeiras de poupança, definindo nome, valor-alvo, data-limite e categoria opcional. O progresso de cada meta é calculado automaticamente com base nas receitas registradas no período.
+
+### Detalhes Técnicos
+
+- Telas de **listagem** (`/goals`) e **criação** (`/goals/new`) de metas, protegidas pelo `ProtectedRoute`
+- Campos do formulário:
+  - Nome da meta;
+  - Valor-alvo;
+  - Data-limite;
+  - Categoria (opcional).
+- Armazenar as metas em um slice `goalsSlice` do Redux
+- Criar thunks `fetchGoals` e `createGoal` consumindo a API (`GET /goals`, `POST /goals`)
+- Selector derivado `selectGoalProgress(goalId)` calculando percentual atingido com base nas transações de receita do slice de transações — sem slice próprio para o progresso
+- **Testes automatizados obrigatórios (Vitest + React Testing Library)**:
+  - `goalsSlice.test.ts`: estado inicial, reducers e thunks (usar `msw` para mock de API)
+  - `goalSelectors.test.ts`: selector com 3 cenários — sem receitas (0%), progresso parcial e meta atingida (100%)
+  - `GoalsList.test.tsx` (ou relativo ao seu componente): renderização da listagem com metas de fixture
+  - `GoalForm.test.tsx` (ou relativo ao seu componente): validação de campos obrigatórios e submissão bem-sucedida
+- Script `npm test` configurado com Vitest no `package.json`
+
+### Critérios de Aceitação
+
+- [ ] O usuário consegue criar uma meta com nome, valor-alvo e data-limite
+- [ ] A listagem exibe todas as metas com barra de progresso percentual atualizada
+- [ ] Não é possível submeter o formulário com campos obrigatórios vazios
+- [ ] O selector de progresso é coberto por testes com cenários de 0%, parcial e 100%
+- [ ] `npm test` passa sem erros
+
+---
+
+## RF06 — Limites de Gastos
+
+### Descrição
+
+O usuário deve conseguir definir limites mensais de gastos por categoria. O sistema deve alertar quando o gasto do mês corrente em uma categoria se aproximar ou ultrapassar o limite definido, utilizando Service Workers para cache offline e notificações — mesmo com a aba em segundo plano.
+
+### Detalhes Técnicos
+
+- Tela de gerenciamento de limites (`/spending-limits`), protegida pelo `ProtectedRoute`
+- Campos do formulário:
+  - Categoria;
+  - Valor-limite (mensal).
+- Armazenar os limites em um slice `spendingLimitsSlice` do Redux
+- Criar thunks `fetchSpendingLimits`, `createSpendingLimit` e `deleteSpendingLimit` consumindo a API
+- Selector derivado `selectSpendingStatus`: cruza os limites com as transações do mês atual e retorna `{ categoryId, limitAmount, spent, percentUsed }[]` — sem slice próprio
+- **Service Worker** (`public/sw.js`, registrado em `main.tsx` via `navigator.serviceWorker.register`):
+  - Estratégia **cache-first** para `GET /categories` e `GET /spending-limits` (Cache API)
+  - Estratégia **network-first com fallback** para `GET /transactions` (exibe dados cacheados quando offline)
+  - **Notificação** via Web Notifications API: quando uma transação é criada com sucesso e `percentUsed ≥ 80%` na categoria, o Service Worker envia uma notificação ao usuário (solicitar permissão com `Notification.requestPermission()`)
+  - Página de **offline fallback** exibida quando nenhum recurso em cache for encontrado
+- Integração no formulário `/transactions/new`: ao preencher categoria e valor, verificar `spendingStatus` no Redux e exibir alerta inline se `percentUsed ≥ 100%`
+
+### Critérios de Aceitação
+
+- [ ] O usuário consegue definir um limite mensal por categoria
+- [ ] A tela exibe o progresso de gastos vs. limite com indicação visual (verde / amarelo ≥ 80% / vermelho ≥ 100%)
+- [ ] Uma Web Notification é exibida quando o gasto em uma categoria atinge 80% do limite ao criar uma transação
+- [ ] A aplicação exibe dados cacheados (transações, limites e categorias) quando offline
+- [ ] O formulário de nova transação exibe alerta inline quando a categoria selecionada já atingiu o limite
+
+## RF07 — Relatórios Financeiros (Microfrontend - Definido pelo grupo)
+
+### Descrição
+
+O usuário deve conseguir visualizar relatórios financeiros detalhados baseados nas transações já cadastradas. A funcionalidade utilizará gráficos e indicadores visuais para facilitar a análise da evolução do saldo, distribuição de gastos por categoria e balanço de receitas versus despesas. O módulo deve ser implementado como uma aplicação independente (Microfrontend).
+
+### Detalhes Técnicos
+
+- **Arquitetura Isolada:** Implementar o módulo como um Microfrontend (via Vite Module Federation) em um projeto separado (ex: `financas-mfe-reports`), expondo-o para o host.
+- **Roteamento:** A aplicação principal (`financas-webapp`) deve consumir o MFE e renderizá-lo na rota `/reports`, protegida pelo `ProtectedRoute`.
+- **Gerenciamento de Estado:** Não devem ser criados novos endpoints na API. O MFE deve consumir a lista de transações diretamente do estado global (Redux) da aplicação host ou disparar o thunk `fetchTransactions` existente.
+- **Filtros e Cálculos:** Implementar filtros dinâmicos na interface por:
+  - Período (mês/ano);
+  - Categoria;
+  - Tipo de transação.
+- **Visualização de Dados:** Utilizar selectors derivados para processar os dados e renderizar:
+  - Gráfico de despesas por categoria;
+  - Gráfico comparativo de receitas vs despesas;
+  - Gráfico de evolução do saldo no período;
+  - Cards de totalizadores (Total de Receitas, Total de Despesas, Saldo do Período).
+- **Bibliotecas:** Sugere-se o uso de bibliotecas como Recharts ou Chart.js para a renderização visual dentro do MFE.
+
+### Critérios de Aceitação
+
+- [ ] O usuário consegue acessar a rota `/reports` protegida e visualizar o dashboard de relatórios integrado de forma transparente (Microfrontend).
+- [ ] A tela exibe os cards totalizadores (saldo, receitas e despesas do período) com valores exatos calculados a partir das transações em memória.
+- [ ] O sistema renderiza corretamente o gráfico de despesas por categoria e o gráfico de receitas vs. despesas.
+- [ ] Ao interagir com os filtros (período, categoria ou tipo), todos os gráficos e cards da tela são recalculados e atualizados instantaneamente.
+- [ ] A aplicação principal exibe um estado visual de carregamento (ex: *loading spinner* ou *skeleton*) enquanto o componente do microfrontend está sendo baixado.
+- [ ] O projeto do microfrontend roda de forma totalmente independente em ambiente local, possuindo seu próprio `package.json` e arquivo de configuração.
