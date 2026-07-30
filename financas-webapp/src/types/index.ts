@@ -54,3 +54,15 @@ export interface PageResponse<T> {
   size: number;
   number: number;
 }
+
+export interface SpendingLimit {
+  id: number;
+  limitAmount: number;
+  categoryId: number;
+  categoryName: string;
+}
+
+export interface NewSpendingLimit {
+  limitAmount: number;
+  categoryId: number;
+}
