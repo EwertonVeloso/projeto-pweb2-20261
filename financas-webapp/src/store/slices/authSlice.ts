@@ -54,7 +54,7 @@ const authSlice = createSlice({
   name: 'auth',
   initialState: {
     token: localStorage.getItem('token') || null,
-    userName: null as string | null,
+    userName: localStorage.getItem('userName') || null,
     status: 'idle' as 'idle' | 'loading' | 'succeeded' | 'failed',
     error: null as string | null,
   },
@@ -63,6 +63,7 @@ const authSlice = createSlice({
       state.token = null;
       state.userName = null;
       localStorage.removeItem('token');
+      localStorage.removeItem('userName');
     },
     clearAuthError: (state) => {
       state.error = null;
@@ -81,6 +82,7 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.userName = action.payload.name;
         localStorage.setItem('token', action.payload.token);
+        localStorage.setItem('userName', action.payload.name);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.status = 'failed';
