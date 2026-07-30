@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
 import NewTransaction from './pages/NewTransaction';
+import SpendingLimits from './pages/SpendingLimits';
 import { store } from './store';
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/transactions" element={<Transactions />} />
               <Route path="/transactions/new" element={<NewTransaction />} />
+              <Route path="/spending-limits" element={<SpendingLimits />} />
             </Route>
           </Route>
           
