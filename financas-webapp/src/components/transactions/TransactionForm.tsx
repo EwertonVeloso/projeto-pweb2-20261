@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../../store';
 import { createTransaction, fetchCategories } from '../../store/slices/transactionSlice.ts';
+import { selectSpendingStatus } from '../../store/slices/spendingLimitsSlice.ts';
 import type { Transaction } from '../../types';
 
 export interface TransactionFormProps {
@@ -85,16 +86,31 @@ export default function TransactionForm({ onClose, onSuccess }: TransactionFormP
 
     try {
       setLoading(true);
+      const newAmount = parseFloat(amount);
       await dispatch(
         createTransaction({
           description: description.trim(),
-          amount: parseFloat(amount),
+          amount: newAmount,
           type,
           date,
           categoryId: parseInt(categoryId, 10),
           tag: tag.trim() || undefined,
         })
       ).unwrap();
+
+      if (type === 'EXPENSE' && currentLimit) {
+        const projectedPercent = currentLimit.limitAmount > 0
+          ? Math.round(((currentLimit.spent + newAmount) / currentLimit.limitAmount) * 100)
+          : 0;
+
+        if (projectedPercent >= 80 && 'serviceWorker' in navigator && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({
+            type: 'SHOW_NOTIFICATION',
+            title: 'Limite de Gastos Atingido',
+            body: `A categoria ${currentLimit.categoryName} atingiu ${projectedPercent}% do limite mensal de ${formatCurrency(currentLimit.limitAmount)}.`,
+          });
+        }
+      }
 
       // Reset dos campos
       setDescription('');
@@ -110,7 +126,24 @@ export default function TransactionForm({ onClose, onSuccess }: TransactionFormP
     }
   };
 
+  const spendingStatus = useSelector(selectSpendingStatus);
+
+  const selectedCategoryId = categoryId ? parseInt(categoryId, 10) : null;
+  const currentLimit = selectedCategoryId && type === 'EXPENSE'
+    ? spendingStatus.find((s) => s.categoryId === selectedCategoryId)
+    : null;
+  const newSpent = currentLimit
+    ? currentLimit.spent + (amount ? parseFloat(amount) : 0)
+    : 0;
+  const newPercentUsed = currentLimit && currentLimit.limitAmount > 0
+    ? Math.round((newSpent / currentLimit.limitAmount) * 100)
+    : 0;
+  const isOverLimit = currentLimit && newPercentUsed >= 100;
+
   const isIncome = type === 'INCOME';
+
+  const formatCurrency = (n: number) =>
+    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n);
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
@@ -196,6 +229,21 @@ export default function TransactionForm({ onClose, onSuccess }: TransactionFormP
             </option>
           ))}
         </select>
+
+        {isOverLimit && (
+          <div className="mt-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-sm font-medium text-red-600 dark:text-red-400">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+              </svg>
+              <span>
+                Atenção: a categoria <strong>{currentLimit!.categoryName}</strong> já atingiu{' '}
+                <strong>{newPercentUsed}%</strong> do limite mensal de{' '}
+                {formatCurrency(currentLimit!.limitAmount)} com esta transação.
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Valor e Data ────────────────────────────────────────────────── */}
