@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { api } from '../../services/api.ts';
+import { logout } from './authSlice.ts';
 import type { NewTransaction, Transaction, Category, PageResponse } from '../../types';
 
 // ─── Parâmetros ────────────────────────────────────────────────────────────────
@@ -183,6 +184,7 @@ const transactionSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(logout, () => initialState)
       // fetchTransactions 
       .addCase(fetchTransactions.pending, (state) => {
         state.status = 'loading';
@@ -241,6 +243,13 @@ const transactionSlice = createSlice({
           state.items = [action.payload, ...state.items].slice(0, state.pageSize);
         }
         state.totalElements += 1;
+        // Mantém dashboardItems sincronizado para o selectSpendingStatus
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        if (action.payload.date.startsWith(`${year}-${month}`)) {
+          state.dashboardItems = [action.payload, ...state.dashboardItems];
+        }
       })
       .addCase(createTransaction.rejected, (state, action) => {
         state.status = 'failed';
