@@ -41,6 +41,15 @@ const navItems = [
       </svg>
     ),
   },
+  {
+    label: 'Relatórios',
+    to: '/reports',
+    icon: (
+      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v16.5M21 19.5H3.75M6.75 15h2.25V7.5H6.75V15Zm6-3h2.25V9H12.75v3Zm6-6H21v9h-2.25V6Z" />
+      </svg>
+    ),
+  },
 ];
 
 export default function MainLayout() {

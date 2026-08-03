@@ -7,12 +7,13 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Node modules & build
 node_modules
 dist
 dist-ssr
 *.local
 
-# Editor directories and files
+# IDEs and editors config
 .idea/
 *.iml
 .vscode/
@@ -22,4 +23,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.env.development
