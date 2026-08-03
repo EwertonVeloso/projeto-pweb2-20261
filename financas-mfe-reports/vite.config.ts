@@ -12,10 +12,15 @@ export default defineConfig({
       name: 'financas_mfe_reports',
       filename: 'remoteEntry.js',
       exposes: {
-        './ReportsApp': './src/App.tsx',
+        './ReportsApp': {
+          import: './src/App.tsx',
+          dontAppendStylesToHead: true,
+        },
       },
       shared: ['react', 'react-dom', 'react-redux', '@reduxjs/toolkit', 'react-router-dom'],
     }),
+
+
   ],
   build: {
     target: 'esnext',
