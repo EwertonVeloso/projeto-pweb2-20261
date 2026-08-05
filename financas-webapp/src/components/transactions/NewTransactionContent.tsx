@@ -38,7 +38,7 @@ export default function NewTransactionContent() {
       {/* Card do Formulário */}
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl p-6 sm:p-8">
         <div className="mb-6">
-          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
+          <h2 className="text-xl font-extralight text-gray-800 dark:text-gray-100">
             Cadastrar Transação
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">

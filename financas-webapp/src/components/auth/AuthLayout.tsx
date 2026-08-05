@@ -23,9 +23,9 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
             className="font-bold leading-tight text-white"
             style={{ fontSize: 'clamp(4rem, 3vw, 3rem)', margin: 0 }}
           >
-            Bem vindo ao<br />finanças
+            Bem vindo ao<br />Pockly
           </h2>
-          <p className="mt-3 text-sm text-white/70">
+          <p className="mt-8 text-sm text-white/70">
             Faça login para acessar a sua conta
           </p>
         </div>

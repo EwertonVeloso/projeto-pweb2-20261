@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
 import NewTransaction from './pages/NewTransaction';
 import SpendingLimits from './pages/SpendingLimits';
+import NewSpendingLimit from './pages/NewSpendingLimit';
 import Goals from './pages/Goals';
 import NewGoal from './pages/NewGoal';
 import { store } from './store';
@@ -29,6 +30,7 @@ export default function App() {
               <Route path="/transactions" element={<Transactions />} />
               <Route path="/transactions/new" element={<NewTransaction />} />
               <Route path="/spending-limits" element={<SpendingLimits />} />
+              <Route path="/spending-limits/new" element={<NewSpendingLimit />} />
               <Route path="/goals" element={<Goals />} />
               <Route path="/goals/new" element={<NewGoal />} />
               <Route

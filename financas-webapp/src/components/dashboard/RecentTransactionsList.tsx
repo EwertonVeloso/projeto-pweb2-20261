@@ -60,7 +60,7 @@ export default function RecentTransactionsList({
   return (
     <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm overflow-hidden flex flex-col">
       <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-700/50 flex justify-between items-center">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white m-0">
+        <h2 className="text-lg font-extralight text-gray-900 dark:text-white m-0">
           Transações Recentes (Últimas 5)
         </h2>
         <Link

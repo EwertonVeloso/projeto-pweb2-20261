@@ -7,7 +7,7 @@ export default function Goals() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <h1 className="text-2xl font-extralight text-gray-900 dark:text-gray-100">
             Metas Financeiras
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">

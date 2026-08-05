@@ -26,8 +26,8 @@ export default function LoginForm() {
       {/* Header */}
       <div className="mb-8">
         <h1
-          className="text-white"
-          style={{ fontSize: '2rem', fontWeight: 700, fontStyle: 'normal', letterSpacing: '0px', margin: 0 }}
+          className="font-extralight text-white"
+          style={{ fontSize: '2rem', fontStyle: 'normal', letterSpacing: '0px', margin: 0 }}
         >
           Login
         </h1>

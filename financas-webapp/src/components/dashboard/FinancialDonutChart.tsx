@@ -23,7 +23,7 @@ export default function FinancialDonutChart({ income, expense, formatCurrency }:
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm flex flex-col justify-between h-full min-h-[350px]">
-      <h2 className="text-lg font-bold text-gray-900 dark:text-white m-0">
+      <h2 className="text-lg font-extralight text-gray-900 dark:text-white m-0">
         Distribuição Financeira
       </h2>
 

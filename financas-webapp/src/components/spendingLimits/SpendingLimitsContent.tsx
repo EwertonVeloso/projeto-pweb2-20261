@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import type { AppDispatch, RootState } from '../../store';
 import {
   deleteSpendingLimit,
@@ -7,16 +8,14 @@ import {
   selectSpendingStatus,
 } from '../../store/slices/spendingLimitsSlice';
 import { fetchDashboardTransactions } from '../../store/slices/transactionSlice';
-import Modal from '../common/Modal';
-import SpendingLimitForm from './SpendingLimitForm';
 import SpendingLimitRow from './SpendingLimitRow';
 
 export default function SpendingLimitsContent() {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { status, error } = useSelector((state: RootState) => state.spendingLimits);
   const { dashboardStatus } = useSelector((state: RootState) => state.transactions);
   const spendingStatus = useSelector(selectSpendingStatus);
-  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     if (status === 'idle') {
@@ -31,7 +30,7 @@ export default function SpendingLimitsContent() {
     <div className="p-6 max-w-4xl mx-auto animate-surgir">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+          <h2 className="text-2xl font-extralight text-gray-800 dark:text-gray-100">
             Limites de Gastos
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -39,7 +38,7 @@ export default function SpendingLimitsContent() {
           </p>
         </div>
         <button
-          onClick={() => setModalOpen(true)}
+          onClick={() => navigate('/spending-limits/new')}
           className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-lg shadow-sm transition-colors duration-150"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
@@ -86,10 +85,6 @@ export default function SpendingLimitsContent() {
           ))}
         </div>
       )}
-
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Novo Limite de Gasto">
-        <SpendingLimitForm onSuccess={() => setModalOpen(false)} />
-      </Modal>
     </div>
   );
 }

@@ -81,7 +81,7 @@ export default function TransactionListContent() {
       {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+          <h2 className="text-2xl font-extralight text-gray-800 dark:text-gray-100">
             Gestão de Transações
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">

@@ -1,6 +1,7 @@
 import type { FormEvent } from 'react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import type { AppDispatch, RootState } from '../../store';
 import { createSpendingLimit } from '../../store/slices/spendingLimitsSlice';
 import { fetchCategories } from '../../store/slices/transactionSlice';
@@ -11,6 +12,7 @@ interface SpendingLimitFormProps {
 
 export default function SpendingLimitForm({ onSuccess }: SpendingLimitFormProps) {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { categories, categoriesStatus } = useSelector(
     (state: RootState) => state.transactions
   );
@@ -52,6 +54,7 @@ export default function SpendingLimitForm({ onSuccess }: SpendingLimitFormProps)
         })
       ).unwrap();
       onSuccess?.();
+      navigate('/spending-limits');
     } catch (err) {
       setError(typeof err === 'string' && err ? err : 'Erro ao criar limite.');
     } finally {
