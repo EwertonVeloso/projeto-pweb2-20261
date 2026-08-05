@@ -77,8 +77,8 @@ self.addEventListener('message', (event) => {
 
     self.registration.showNotification(title, {
       body,
-      icon: '/favicon.svg',
-      badge: '/favicon.svg',
+      icon: '/financeiro.png',
+      badge: '/financeiro.png',
       tag: 'spending-limit-alert',
       requireInteraction: true,
     });
