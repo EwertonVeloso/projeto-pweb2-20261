@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import Toast from '../common/Toast';
-import TransactionTable from './TransactionTable';
-import TransactionFilters from './TransactionFilters.tsx';
-import TransactionExportSection from './TransactionExportSection';
-import TransactionPagination from './TransactionPagination';
 import type { AppDispatch, RootState } from '../../store';
-import { fetchTransactions, fetchCategories, fetchExportTransactions } from '../../store/slices/transactionSlice';
+import { fetchCategories, fetchExportTransactions, fetchTransactions } from '../../store/slices/transactionSlice';
 import { exportTransactionsCsv } from '../../utils/exportTransactionsCsv';
+import Toast from '../common/Toast';
+import TransactionExportSection from './TransactionExportSection';
+import TransactionFilters from './TransactionFilters.tsx';
+import TransactionPagination from './TransactionPagination';
+import TransactionTable from './TransactionTable';
 
 export default function TransactionListContent() {
   const dispatch = useDispatch<AppDispatch>();
@@ -117,7 +117,7 @@ export default function TransactionListContent() {
           <Link
             id="btn-nova-transacao"
             to="/transactions/new"
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 rounded-lg shadow-sm transition-colors duration-150"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-lg shadow-sm transition-colors duration-150"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -132,7 +132,7 @@ export default function TransactionListContent() {
                 clipRule="evenodd"
               />
             </svg>
-            Nova Transação
+            Cadastrar Transação
           </Link>
         </div>
       </div>

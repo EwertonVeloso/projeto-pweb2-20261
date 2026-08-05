@@ -6,7 +6,7 @@ export default function NewGoal() {
     <div className="p-6 max-w-xl mx-auto animate-surgir">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500 mb-6">
-        <Link to="/goals" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+        <Link to="/goals" className="hover:text-purple-600 dark:hover:text-indigo-400 transition-colors">
           Metas
         </Link>
         <span>/</span>

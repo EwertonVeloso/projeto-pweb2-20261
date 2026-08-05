@@ -1,11 +1,11 @@
 import type { FormEvent } from 'react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import type { AppDispatch, RootState } from '../../store';
-import { createGoal, clearGoalCreateStatus } from '../../store/slices/goalsSlice';
+import { clearGoalCreateStatus, createGoal } from '../../store/slices/goalsSlice';
 import { fetchCategories } from '../../store/slices/transactionSlice';
-import type { NewGoal, GoalFormErrors } from '../../types/goal';
+import type { GoalFormErrors, NewGoal } from '../../types/goal';
 
 // ─── Validation ────────────────────────────────────────────────────────────────
 
@@ -244,7 +244,7 @@ export default function GoalForm({ onSuccess, onCancel }: GoalFormProps) {
         <button
           type="submit"
           disabled={isLoading}
-          className="px-5 py-2.5 text-sm font-semibold text-white rounded-xl shadow-sm transition-all duration-150 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="px-5 py-2.5 text-sm font-semibold text-white rounded-xl shadow-sm transition-all duration-150 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {isLoading ? 'Salvando...' : 'Salvar meta'}
         </button>

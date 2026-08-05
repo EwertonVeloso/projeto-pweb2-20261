@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
 import type { AppDispatch, RootState } from '../../store';
 import { fetchGoals } from '../../store/slices/goalsSlice';
 import { fetchDashboardTransactions } from '../../store/slices/transactionSlice';
@@ -59,15 +58,6 @@ export default function GoalList() {
         <p className="text-sm text-gray-400 dark:text-gray-500 mb-6">
           Crie sua primeira meta financeira
         </p>
-        <Link
-          to="/goals/new"
-          className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition-colors duration-150"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          Criar meta
-        </Link>
       </div>
     );
   }

@@ -1,9 +1,9 @@
 import type { FormEvent } from 'react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../../store';
-import { createTransaction, fetchCategories, fetchDashboardTransactions } from '../../store/slices/transactionSlice.ts';
 import { fetchSpendingLimits, selectSpendingStatus } from '../../store/slices/spendingLimitsSlice.ts';
+import { createTransaction, fetchCategories, fetchDashboardTransactions } from '../../store/slices/transactionSlice.ts';
 import type { Transaction } from '../../types';
 
 export interface TransactionFormProps {
@@ -343,8 +343,8 @@ export default function TransactionForm({ onClose, onSuccess }: TransactionFormP
           type="submit"
           disabled={loading || !amount || !date || !effectiveCategoryId}
           className="px-5 py-2 text-sm font-semibold text-white rounded-lg shadow-sm transition-all duration-150
-            bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600
-            disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-indigo-600"
+            bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600
+            disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-purple-600"
         >
           {loading ? 'Salvando...' : 'Adicionar'}
         </button>
