@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
@@ -17,6 +17,19 @@ vi.mock('react-router-dom', async () => {
   return { ...actual, useNavigate: () => mockNavigate };
 });
 
+// Mock do serviço de metas para o createGoal resolver
+vi.mock('../../services/goalsService', () => ({
+  goalsService: {
+    fetchAll: vi.fn().mockResolvedValue([]),
+    create: vi.fn().mockResolvedValue({
+      id: 99,
+      name: 'Viagem',
+      targetAmount: 5000,
+      deadline: '2025-12-31',
+    }),
+  },
+}));
+
 // Helpers
 
 function buildStore(overrides = {}) {
@@ -26,7 +39,7 @@ function buildStore(overrides = {}) {
       transactions: transactionReducer,
       spendingLimits: spendingLimitsReducer,
       auth: authReducer,
-    } as any,
+    },
     preloadedState: {
       goals: {
         items: [],
@@ -36,7 +49,7 @@ function buildStore(overrides = {}) {
         createError: null,
         ...overrides,
       },
-    } as any,
+    },
   });
 }
 
@@ -87,11 +100,11 @@ describe('GoalForm', () => {
 
       await user.click(screen.getByRole('button', { name: /salvar/i }));
 
-      // Nenhum thunk deve ter sido disparado (apenas ações síncronas)
+      // Nenhum thunk de submit deve ser disparado (apenas fetchCategories do mount)
       const asyncActions = dispatchSpy.mock.calls.filter(
         ([action]) => typeof action === 'function'
       );
-      expect(asyncActions).toHaveLength(0);
+      expect(asyncActions).toHaveLength(1);
     });
   });
 
@@ -105,7 +118,7 @@ describe('GoalForm', () => {
         type: 'goals/createGoal/fulfilled',
         payload: { id: 99, name: 'Viagem', targetAmount: 5000, deadline: '2025-12-31' },
         unwrap: () => ({ id: 99, name: 'Viagem', targetAmount: 5000, deadline: '2025-12-31' }),
-      } as any);
+      });
 
       renderForm(store);
 
@@ -137,16 +150,17 @@ describe('GoalForm', () => {
 
     it('campo categoria não deve ser obrigatório', async () => {
       const user = userEvent.setup();
-      renderForm();
+      const store = buildStore();
+      renderForm(store);
 
-      // Preencher apenas os campos obrigatórios
+      // Preencher apenas os campos obrigatórios (sem categoria)
       await user.type(screen.getByLabelText(/nome da meta/i), 'Viagem');
       await user.type(screen.getByLabelText(/valor alvo/i), '5000');
       await user.type(screen.getByLabelText(/data limite/i), '2025-12-31');
       await user.click(screen.getByRole('button', { name: /salvar/i }));
 
-      // Não deve aparecer erro de categoria
-      expect(screen.queryByText(/categoria/i)).not.toHaveAttribute('id', 'goal-category-error');
+      // O submit não deve ser bloqueado pela ausência de categoria
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/goals'));
     });
   });
 

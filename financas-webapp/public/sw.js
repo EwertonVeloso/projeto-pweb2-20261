@@ -22,7 +22,7 @@ self.addEventListener('activate', (event) => {
 });
 
 function shouldCacheFirst(url) {
-  return url.includes('/api/categories');
+  return url.includes('/api/categories') || url.includes('/api/spending-limits');
 }
 
 function shouldNetworkFirst(url) {

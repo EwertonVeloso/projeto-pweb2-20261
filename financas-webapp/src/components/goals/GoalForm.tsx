@@ -1,9 +1,10 @@
 import type { FormEvent } from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import type { AppDispatch, RootState } from '../../store';
 import { createGoal, clearGoalCreateStatus } from '../../store/slices/goalsSlice';
+import { fetchCategories } from '../../store/slices/transactionSlice';
 import type { NewGoal, GoalFormErrors } from '../../types/goal';
 
 // ─── Validation ────────────────────────────────────────────────────────────────
@@ -41,8 +42,18 @@ export default function GoalForm({ onSuccess, onCancel }: GoalFormProps) {
   const [name, setName] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
   const [deadline, setDeadline] = useState('');
-  const [category, setCategory] = useState('');
+  const [categoryId, setCategoryId] = useState('');
   const [errors, setErrors] = useState<GoalFormErrors>({});
+
+  const { categories, categoriesStatus } = useSelector(
+    (state: RootState) => state.transactions
+  );
+
+  useEffect(() => {
+    if (categoriesStatus === 'idle') {
+      dispatch(fetchCategories());
+    }
+  }, [categoriesStatus, dispatch]);
 
   const isLoading = createStatus === 'loading';
 
@@ -54,7 +65,7 @@ export default function GoalForm({ onSuccess, onCancel }: GoalFormProps) {
       name: name.trim(),
       targetAmount: parseFloat(targetAmount),
       deadline,
-      category: category.trim() || undefined,
+      categoryId: categoryId ? parseInt(categoryId, 10) : undefined,
     };
 
     const validationErrors = validateGoalForm(formData);
@@ -203,15 +214,21 @@ export default function GoalForm({ onSuccess, onCancel }: GoalFormProps) {
         >
           Categoria <span className="text-gray-400 font-normal">(opcional)</span>
         </label>
-        <input
+        <select
           id="goal-category"
-          type="text"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          placeholder="Ex: Viagem, Emergência, Educação"
+          value={categoryId}
+          onChange={(e) => setCategoryId(e.target.value)}
           disabled={isLoading}
-          className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 placeholder-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"
-        />
+          className="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 disabled:opacity-60"
+        >
+          <option value="">Sem categoria</option>
+          {categoriesStatus === 'loading' && <option value="">Carregando...</option>}
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Actions */}

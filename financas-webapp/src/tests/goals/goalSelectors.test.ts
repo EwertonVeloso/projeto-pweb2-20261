@@ -138,8 +138,8 @@ describe('goalSelectors', () => {
         [income(1, 2500), expense(2, 500)]
       );
       // O estado goals.items não deve conter percentComplete nem accumulated
-      expect((state.goals.items[0] as any).percentComplete).toBeUndefined();
-      expect((state.goals.items[0] as any).accumulated).toBeUndefined();
+      expect('percentComplete' in state.goals.items[0]).toBe(false);
+      expect('accumulated' in state.goals.items[0]).toBe(false);
     });
   });
 

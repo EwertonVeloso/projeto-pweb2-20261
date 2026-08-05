@@ -1,7 +1,16 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import axios from 'axios';
 import { goalsService } from '../../services/goalsService';
 import { logout } from './authSlice';
 import type { Goal, NewGoal } from '../../types/goal';
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { message?: string } | undefined;
+    return data?.message ?? fallback;
+  }
+  return fallback;
+}
 
 // ─── Thunks ────────────────────────────────────────────────────────────────────
 
@@ -10,9 +19,8 @@ export const fetchGoals = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       return await goalsService.fetchAll();
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'Falha ao carregar metas';
-      return thunkAPI.rejectWithValue(message);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(getErrorMessage(error, 'Falha ao carregar metas'));
     }
   }
 );
@@ -22,9 +30,8 @@ export const createGoal = createAsyncThunk(
   async (goal: NewGoal, thunkAPI) => {
     try {
       return await goalsService.create(goal);
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'Falha ao criar meta';
-      return thunkAPI.rejectWithValue(message);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(getErrorMessage(error, 'Falha ao criar meta'));
     }
   }
 );

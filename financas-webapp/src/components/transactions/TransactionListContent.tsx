@@ -19,7 +19,9 @@ export default function TransactionListContent() {
     (state: RootState) => state.transactions
   );
 
-  const [showToast, setShowToast] = useState(false);
+  const [showToast, setShowToast] = useState(() =>
+    Boolean((location.state as { showSuccessToast?: boolean } | null)?.showSuccessToast)
+  );
 
   // Filtros locais
   const [filterType, setFilterType] = useState<'INCOME' | 'EXPENSE' | ''>('');
@@ -29,13 +31,12 @@ export default function TransactionListContent() {
   const [exportStartDate, setExportStartDate] = useState('');
   const [exportEndDate, setExportEndDate] = useState('');
 
-  // Captura o toast de sucesso se veio redirecionado de /transactions/new
+  // Limpa o estado de navegação para o toast não reaparecer em voltas/refresh
   useEffect(() => {
-    if (location.state && (location.state as any).showSuccessToast) {
-      setShowToast(true);
+    if (showToast) {
       navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location, navigate]);
+  }, [showToast, location, navigate]);
 
   // Carrega transações e categorias
   useEffect(() => {

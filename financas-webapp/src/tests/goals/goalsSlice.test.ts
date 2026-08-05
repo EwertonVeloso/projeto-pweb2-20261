@@ -22,7 +22,8 @@ const mockGoal: Goal = {
   name: 'Viagem',
   targetAmount: 5000,
   deadline: '2025-12-31',
-  category: 'Lazer',
+  categoryId: 1,
+  categoryName: 'Lazer',
 };
 
 // Tests

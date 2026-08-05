@@ -32,9 +32,9 @@ export default function GoalCard({ goal }: GoalCardProps) {
           <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 truncate">
             {goal.name}
           </h3>
-          {goal.category && (
+          {goal.categoryName && (
             <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">
-              {goal.category}
+              {goal.categoryName}
             </span>
           )}
         </div>

@@ -1,7 +1,16 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import axios from 'axios';
 import { api } from '../../services/api.ts';
 import { logout } from './authSlice.ts';
 import type { NewTransaction, Transaction, Category, PageResponse } from '../../types';
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { message?: string } | undefined;
+    return data?.message ?? fallback;
+  }
+  return fallback;
+}
 
 // ─── Parâmetros ────────────────────────────────────────────────────────────────
 
@@ -24,7 +33,7 @@ export const fetchTransactions = createAsyncThunk(
   'transactions/fetchTransactions',
   async (params: FetchTransactionsParams | undefined, thunkAPI) => {
     try {
-      const queryParams: Record<string, any> = {};
+      const queryParams: Record<string, string | number | undefined> = {};
       if (params) {
         if (params.page !== undefined) queryParams.page = params.page;
         if (params.size !== undefined) queryParams.size = params.size;
@@ -38,10 +47,8 @@ export const fetchTransactions = createAsyncThunk(
         params: queryParams,
       });
       return response.data;
-    } catch (error: any) {
-      console.error('Erro ao buscar transações:', error.response?.status, error.response?.data || error.message);
-      const message = error.response?.data?.message || 'Falha ao carregar transações';
-      return thunkAPI.rejectWithValue(message);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(getErrorMessage(error, 'Falha ao carregar transações'));
     }
   }
 );
@@ -64,10 +71,8 @@ export const fetchDashboardTransactions = createAsyncThunk(
         },
       });
       return response.data.content;
-    } catch (error: any) {
-      console.error('Erro ao buscar transações do dashboard:', error.response?.status, error.response?.data || error.message);
-      const message = error.response?.data?.message || 'Falha ao carregar dados do dashboard';
-      return thunkAPI.rejectWithValue(message);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(getErrorMessage(error, 'Falha ao carregar dados do dashboard'));
     }
   }
 );
@@ -77,7 +82,7 @@ export const fetchExportTransactions = createAsyncThunk(
   'transactions/fetchExportTransactions',
   async (params: FetchExportParams | undefined, thunkAPI) => {
     try {
-      const queryParams: Record<string, any> = {
+      const queryParams: Record<string, string | number | undefined> = {
         size: 10000,
       };
       if (params?.startDate) queryParams.startDate = params.startDate;
@@ -87,10 +92,8 @@ export const fetchExportTransactions = createAsyncThunk(
         params: queryParams,
       });
       return response.data.content;
-    } catch (error: any) {
-      console.error('Erro ao buscar transações para exportação:', error.response?.status, error.response?.data || error.message);
-      const message = error.response?.data?.message || 'Falha ao carregar transações para exportação';
-      return thunkAPI.rejectWithValue(message);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(getErrorMessage(error, 'Falha ao carregar transações para exportação'));
     }
   }
 );
@@ -101,10 +104,8 @@ export const createTransaction = createAsyncThunk(
     try {
       const response = await api.post<Transaction>('/transactions', transaction);
       return response.data;
-    } catch (error: any) {
-      console.error('Erro ao criar transação:', error.response?.status, error.response?.data || error.message);
-      const message = error.response?.data?.message || 'Falha ao criar transação';
-      return thunkAPI.rejectWithValue(message);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(getErrorMessage(error, 'Falha ao criar transação'));
     }
   }
 );
@@ -115,10 +116,8 @@ export const fetchCategories = createAsyncThunk(
     try {
       const response = await api.get<Category[]>('/categories');
       return response.data;
-    } catch (error: any) {
-      console.error('Erro ao buscar categorias:', error.response?.status, error.response?.data || error.message);
-      const message = error.response?.data?.message || 'Falha ao carregar categorias';
-      return thunkAPI.rejectWithValue(message);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(getErrorMessage(error, 'Falha ao carregar categorias'));
     }
   }
 );

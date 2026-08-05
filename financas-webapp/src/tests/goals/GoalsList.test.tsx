@@ -78,7 +78,7 @@ describe('GoalList', () => {
 
   it('deve renderizar os cards de metas', () => {
     const goals: Goal[] = [
-      { id: 1, name: 'Viagem', targetAmount: 5000, deadline: '2025-12-31', category: 'Lazer' },
+      { id: 1, name: 'Viagem', targetAmount: 5000, deadline: '2025-12-31', categoryId: 1, categoryName: 'Lazer' },
       { id: 2, name: 'Carro', targetAmount: 50000, deadline: '2027-06-01' },
     ];
     const store = buildStore(goals);
@@ -90,7 +90,7 @@ describe('GoalList', () => {
 
   it('deve exibir categoria quando fornecida', () => {
     const goals: Goal[] = [
-      { id: 1, name: 'Viagem', targetAmount: 5000, deadline: '2025-12-31', category: 'Lazer' },
+      { id: 1, name: 'Viagem', targetAmount: 5000, deadline: '2025-12-31', categoryId: 1, categoryName: 'Lazer' },
     ];
     const store = buildStore(goals);
     renderWithStore(store);
@@ -133,7 +133,8 @@ describe('GoalList', () => {
           categories: [], categoriesStatus: 'idle' as const, categoriesError: null,
         },
         spendingLimits: { items: [], status: 'idle' as const, error: null },
-      } as any,
+        auth: { token: null, userName: null, status: 'idle' as const, error: null },
+      },
     });
     renderWithStore(store);
     expect(screen.getByText(/Carregando metas/i)).toBeInTheDocument();
@@ -152,7 +153,8 @@ describe('GoalList', () => {
           categories: [], categoriesStatus: 'idle' as const, categoriesError: null,
         },
         spendingLimits: { items: [], status: 'idle' as const, error: null },
-      } as any,
+        auth: { token: null, userName: null, status: 'idle' as const, error: null },
+      },
     });
     renderWithStore(store);
     expect(screen.getByText('Erro de conexão')).toBeInTheDocument();

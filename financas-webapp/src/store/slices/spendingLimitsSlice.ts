@@ -1,7 +1,16 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import axios from 'axios';
 import { api } from '../../services/api.ts';
 import { logout } from './authSlice.ts';
 import type { SpendingLimit, NewSpendingLimit, Transaction } from '../../types';
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as { message?: string } | undefined;
+    return data?.message ?? fallback;
+  }
+  return fallback;
+}
 
 export const fetchSpendingLimits = createAsyncThunk(
   'spendingLimits/fetchSpendingLimits',
@@ -9,9 +18,8 @@ export const fetchSpendingLimits = createAsyncThunk(
     try {
       const response = await api.get<SpendingLimit[]>('/spending-limits');
       return response.data;
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'Falha ao carregar limites';
-      return thunkAPI.rejectWithValue(message);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(getErrorMessage(error, 'Falha ao carregar limites'));
     }
   }
 );
@@ -22,9 +30,8 @@ export const createSpendingLimit = createAsyncThunk(
     try {
       const response = await api.post<SpendingLimit>('/spending-limits', data);
       return response.data;
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'Falha ao criar limite';
-      return thunkAPI.rejectWithValue(message);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(getErrorMessage(error, 'Falha ao criar limite'));
     }
   }
 );
@@ -35,9 +42,8 @@ export const deleteSpendingLimit = createAsyncThunk(
     try {
       await api.delete(`/spending-limits/${id}`);
       return id;
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'Falha ao excluir limite';
-      return thunkAPI.rejectWithValue(message);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(getErrorMessage(error, 'Falha ao excluir limite'));
     }
   }
 );

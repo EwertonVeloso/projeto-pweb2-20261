@@ -2,8 +2,8 @@ import type { FormEvent } from 'react';
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../../store';
-import { createTransaction, fetchCategories } from '../../store/slices/transactionSlice.ts';
-import { selectSpendingStatus } from '../../store/slices/spendingLimitsSlice.ts';
+import { createTransaction, fetchCategories, fetchDashboardTransactions } from '../../store/slices/transactionSlice.ts';
+import { fetchSpendingLimits, selectSpendingStatus } from '../../store/slices/spendingLimitsSlice.ts';
 import type { Transaction } from '../../types';
 
 export interface TransactionFormProps {
@@ -26,9 +26,10 @@ export default function TransactionForm({ onClose, onSuccess }: TransactionFormP
   const dispatch = useDispatch<AppDispatch>();
 
   // Carrega as categorias do Redux
-  const { categories, categoriesStatus } = useSelector(
+  const { categories, categoriesStatus, dashboardStatus } = useSelector(
     (state: RootState) => state.transactions
   );
+  const limitsStatus = useSelector((state: RootState) => state.spendingLimits.status);
 
   // Campos controlados
   const [description, setDescription] = useState('');
@@ -49,19 +50,22 @@ export default function TransactionForm({ onClose, onSuccess }: TransactionFormP
   const [loading, setLoading] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  // Carrega as categorias
+  // Carrega as categorias e os dados necessários para o alerta de limite
   useEffect(() => {
     if (categoriesStatus === 'idle') {
       dispatch(fetchCategories());
     }
-  }, [categoriesStatus, dispatch]);
-
-  // Seta a primeira categoria como padrão
-  useEffect(() => {
-    if (categories.length > 0 && !categoryId) {
-      setCategoryId(String(categories[0].id));
+    if (limitsStatus === 'idle') {
+      dispatch(fetchSpendingLimits());
     }
-  }, [categories, categoryId]);
+    if (dashboardStatus === 'idle') {
+      dispatch(fetchDashboardTransactions());
+    }
+  }, [categoriesStatus, limitsStatus, dashboardStatus, dispatch]);
+
+  // Se o usuário ainda não escolheu uma categoria, usa a primeira carregada
+  const effectiveCategoryId =
+    categoryId || (categories.length > 0 ? String(categories[0].id) : '');
 
   // Submissão
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -77,15 +81,14 @@ export default function TransactionForm({ onClose, onSuccess }: TransactionFormP
       setValidationError('Por favor, informe a data da transação.');
       return;
     }
-    if (!categoryId) {
+    if (!effectiveCategoryId) {
       setValidationError('Por favor, selecione uma categoria.');
       return;
     }
 
-    setLoading(false);
+    setLoading(true);
 
     try {
-      setLoading(true);
       const newAmount = parseFloat(amount);
       await dispatch(
         createTransaction({
@@ -93,7 +96,7 @@ export default function TransactionForm({ onClose, onSuccess }: TransactionFormP
           amount: newAmount,
           type,
           date,
-          categoryId: parseInt(categoryId, 10),
+          categoryId: parseInt(effectiveCategoryId, 10),
           tag: tag.trim() || undefined,
         })
       ).unwrap();
@@ -119,8 +122,8 @@ export default function TransactionForm({ onClose, onSuccess }: TransactionFormP
 
       onSuccess?.();
       onClose?.();
-    } catch (err: any) {
-      setValidationError(err || 'Ocorreu um erro ao salvar a transação.');
+    } catch (err) {
+      setValidationError(typeof err === 'string' && err ? err : 'Ocorreu um erro ao salvar a transação.');
     } finally {
       setLoading(false);
     }
@@ -128,7 +131,7 @@ export default function TransactionForm({ onClose, onSuccess }: TransactionFormP
 
   const spendingStatus = useSelector(selectSpendingStatus);
 
-  const selectedCategoryId = categoryId ? parseInt(categoryId, 10) : null;
+  const selectedCategoryId = effectiveCategoryId ? parseInt(effectiveCategoryId, 10) : null;
   const currentLimit = selectedCategoryId && type === 'EXPENSE'
     ? spendingStatus.find((s) => s.categoryId === selectedCategoryId)
     : null;
@@ -213,7 +216,7 @@ export default function TransactionForm({ onClose, onSuccess }: TransactionFormP
         </label>
         <select
           id="tf-category"
-          value={categoryId}
+          value={effectiveCategoryId}
           onChange={(e) => setCategoryId(e.target.value)}
           className={inputClass}
           required
@@ -313,8 +316,8 @@ export default function TransactionForm({ onClose, onSuccess }: TransactionFormP
         >
           <span>
             {isIncome ? 'Receita' : 'Despesa'}{' '}
-            {categoryId && categories.length > 0
-              ? `(${categories.find((c) => String(c.id) === categoryId)?.name || ''})`
+            {effectiveCategoryId && categories.length > 0
+              ? `(${categories.find((c) => String(c.id) === effectiveCategoryId)?.name || ''})`
               : ''}{' '}
             em {date}
           </span>
@@ -338,7 +341,7 @@ export default function TransactionForm({ onClose, onSuccess }: TransactionFormP
         )}
         <button
           type="submit"
-          disabled={loading || !amount || !date || !categoryId}
+          disabled={loading || !amount || !date || !effectiveCategoryId}
           className="px-5 py-2 text-sm font-semibold text-white rounded-lg shadow-sm transition-all duration-150
             bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600
             disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-indigo-600"

@@ -26,17 +26,15 @@ export default function SpendingLimitForm({ onSuccess }: SpendingLimitFormProps)
     }
   }, [categoriesStatus, dispatch]);
 
-  useEffect(() => {
-    if (categories.length > 0 && !categoryId) {
-      setCategoryId(String(categories[0].id));
-    }
-  }, [categories, categoryId]);
+  // Se o usuário ainda não escolheu uma categoria, usa a primeira carregada
+  const effectiveCategoryId =
+    categoryId || (categories.length > 0 ? String(categories[0].id) : '');
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
 
-    if (!categoryId) {
+    if (!effectiveCategoryId) {
       setError('Selecione uma categoria.');
       return;
     }
@@ -49,13 +47,13 @@ export default function SpendingLimitForm({ onSuccess }: SpendingLimitFormProps)
       setLoading(true);
       await dispatch(
         createSpendingLimit({
-          categoryId: parseInt(categoryId, 10),
+          categoryId: parseInt(effectiveCategoryId, 10),
           limitAmount: parseFloat(limitAmount),
         })
       ).unwrap();
       onSuccess?.();
-    } catch (err: any) {
-      setError(err || 'Erro ao criar limite.');
+    } catch (err) {
+      setError(typeof err === 'string' && err ? err : 'Erro ao criar limite.');
     } finally {
       setLoading(false);
     }
@@ -75,7 +73,7 @@ export default function SpendingLimitForm({ onSuccess }: SpendingLimitFormProps)
         </label>
         <select
           id="sl-category"
-          value={categoryId}
+          value={effectiveCategoryId}
           onChange={(e) => setCategoryId(e.target.value)}
           required
           className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-shadow duration-150"
